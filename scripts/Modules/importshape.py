@@ -252,14 +252,15 @@ class ImportShapeFile(Module):
                                 pl.append(n)
                                 numberOfPoints += 1     
                                 offset +=1
+
                                 if numberOfPoints > 0:    
                                         if self.isEdge:
-                                            if pl[numberOfPoints - offset].getName() != pl[numberOfPoints].getName(): 
+                                            if str(pl[numberOfPoints - offset].getUUID()) != str(pl[numberOfPoints].getUUID()):                                                 
                                                 startnode =   pl[numberOfPoints - offset]
                                                 endnode = pl[numberOfPoints]
                                                 e = city.addEdge(pl[numberOfPoints - offset], pl[numberOfPoints],  self.EdgeView)
                                                 el.append(e)
-                                                InlcudedEdges[startnode.getName()] = endnode.getName()
+                                                InlcudedEdges[startnode.getUUID()] = endnode.getUUID()
                                                 offset = 0
                                                 for attr in attrvec:      
                                                     e.addAttribute(attr)
