@@ -48,4 +48,5 @@ ELSE()
 ENDIF()
 
 ADD_SUBDIRECTORY(scripts)
+ADD_SUBDIRECTORY(doc)
 ADD_SUBDIRECTORY(src/DynaMind-BasicModules)
