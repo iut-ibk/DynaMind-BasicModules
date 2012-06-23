@@ -1,0 +1,9 @@
+#Append Attributes
+
+The Module intersects faces defined by a view with raster data field. Either the sum or the mean value of the cells within a face is added as an user defined attribute to the face. To check if a cell is with a face the centroid of the cell is used (see [Figure 1](#Figure 1).)
+
+[Figure 1]: images/appendattributes_intersection.png "Intersection Faces with Raster data" 
+![Alt text][Figure 1] 
+
+##Example Adding mean height from a DEM to grid cells
+
