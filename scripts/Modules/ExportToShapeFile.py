@@ -152,7 +152,13 @@ class ExportToShapeFile(Module):
                     hasAttribute = True
                     if (attr[j] in AttributeList) == False:
                          attribute = city.getComponent(names[i]).getAttribute(attr[j])
-                         fielddef = osgeo.ogr.FieldDefn(NewAttriburteNamesForShape[attr[j]], osgeo.ogr.OFTReal)
+                         
+                         print attribute.getName()
+                         if attribute.hasString() is True:
+                             print "String"
+                             fielddef = osgeo.ogr.FieldDefn(NewAttriburteNamesForShape[attr[j]], osgeo.ogr.OFTString)
+                         else:
+                            fielddef = osgeo.ogr.FieldDefn(NewAttriburteNamesForShape[attr[j]], osgeo.ogr.OFTReal)
                          layer.CreateField(fielddef)
                          layerDefinition = layer.GetLayerDefn()  
                          AttributeList.append(attr[j]) 
@@ -164,7 +170,6 @@ class ExportToShapeFile(Module):
                     p2 = city.getNode(edge.getEndpointName())
                     line.AddPoint(p1.getX() + self.offsetX ,p1.getY() + self.offsetY)
                     line.AddPoint(p2.getX()+ self.offsetX ,p2.getY()+ self.offsetY)
-
                     featureIndex = 0
                     feature = osgeo.ogr.Feature(layerDefinition)
                     feature.SetGeometry(line)
@@ -172,8 +177,13 @@ class ExportToShapeFile(Module):
                     hasAttribute = True
                     if hasAttribute == True:        
                         for k in range(len(attr)):
-                                 value = edge.getAttribute(attr[k]).getDouble()
-                                 feature.SetField(NewAttriburteNamesForShape[attr[k]],value)
+                                 at = edge.getAttribute(attr[k])
+                                 if at.hasString() is True:
+                                    value = at.getString()
+                                    feature.SetField(NewAttriburteNamesForShape[attr[k]],value)
+                                 else:
+                                    value = edge.getAttribute(attr[k]).getDouble()
+                                    feature.SetField(NewAttriburteNamesForShape[attr[k]],value)
                     layer.CreateFeature(feature)    
                 shapeData.Destroy()  
  
