@@ -83,13 +83,12 @@ void AddDataToNewView::init()
     if (this->NameOfExistingView.empty())
         return;
 
-    if (this->NameOfNewView.empty())        return;
-
-
+    if (this->NameOfNewView.empty())
+        return;
 
     DM::View*  v = sys_in->getViewDefinition(NameOfExistingView);
     if (!v) {
-        DM::Logger(DM::Warning) << "View does not exist " << this->getName();
+        DM::Logger(DM::Warning) << "View does not exist " << NameOfExistingView << this->getName() << this->getUuid();
         return;
     }
     readView = DM::View(v->getName(), v->getType(), DM::READ);
