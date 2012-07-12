@@ -151,8 +151,7 @@ class ExportToShapeFile(Module):
                 for j in range(len(attr)):
                     hasAttribute = True
                     if (attr[j] in AttributeList) == False:
-                         attribute = city.getComponent(names[i]).getAttribute(attr[j])
-                         
+                         attribute = city.getComponent(names[i]).getAttribute(attr[j])                         
                          print attribute.getName()
                          if attribute.hasString() is True:
                              print "String"
@@ -221,16 +220,17 @@ class ExportToShapeFile(Module):
                 for j in range(len(attr)):
 		     hasAttribute = True
                      if (attr[j] in AttributeList) == False:
-                         attribute = city.getComponent(names[i]).getAttribute(attr[j])
-                         fielddef = osgeo.ogr.FieldDefn(NewAttriburteNamesForShape[attr[j]], osgeo.ogr.OFTReal)
+                         attribute = city.getComponent(names[i]).getAttribute(attr[j])                         
+                         if attribute.hasString() is True:
+                             fielddef = osgeo.ogr.FieldDefn(NewAttriburteNamesForShape[attr[j]], osgeo.ogr.OFTString)
+                         else:
+                            fielddef = osgeo.ogr.FieldDefn(NewAttriburteNamesForShape[attr[j]], osgeo.ogr.OFTReal)
                          layer.CreateField(fielddef)
                          layerDefinition = layer.GetLayerDefn()  
                          AttributeList.append(attr[j])                         
 		for i in range(len(names)): 
                     #Append Attributes
-                    alist = city.getComponent(names[i]).getAllAttributes().keys()                          
-                        
-                            
+                    alist = city.getComponent(names[i]).getAllAttributes().keys()   
                     #Addend Points
                     node = city.getNode(names[i])
                     point = osgeo.ogr.Geometry(osgeo.ogr.wkbPoint)
@@ -242,9 +242,14 @@ class ExportToShapeFile(Module):
                     #feature.SetField("Z", node.getZ())
                     #Append Attributes
                     if hasAttribute:        
-                        for k in range(len(attr)):
-                              value = city.getComponent(names[i]).getAttribute(attr[k]).getDouble()
-                              feature.SetField(NewAttriburteNamesForShape[attr[k]],value)
-                    layer.CreateFeature(feature)  
+                      for k in range(len(attr)):
+                                 at = node.getAttribute(attr[k])
+                                 if at.hasString() is True:
+                                    value = at.getString()
+                                    feature.SetField(NewAttriburteNamesForShape[attr[k]],value)
+                                 else:
+                                    value = edge.getAttribute(attr[k]).getDouble()
+                                    feature.SetField(NewAttriburteNamesForShape[attr[k]],value)
+                    layer.CreateFeature(feature)    
                 shapeData.Destroy()            
                
