@@ -15,10 +15,11 @@ class RainGui(QtGui.QDialog):
         self.ui.le_r.setText(self.module.getParameterAsString("FileName"))
         QtCore.QObject.connect(self.ui.pb_preview, QtCore.SIGNAL("released()"), self.preview)
         QtCore.QObject.connect(self.ui.buttonBox, QtCore.SIGNAL("accepted()"), self.save_values)
-        QtCore.QObject.connect(self.ui.pb_r, QtCore.SIGNAL("accepted()"), self.load)
+        QtCore.QObject.connect(self.ui.pb_r, QtCore.SIGNAL("released()"), self.load)
         
     def preview(self):    
-        a = netCDF4.Dataset(self.module.getParameterAsString("FileName"),'r',format='NETCDF4')
+        filename = str(self.ui.le_r.text())
+        a = netCDF4.Dataset(filename,'r',format='NETCDF4')
         data = a.variables['rain'][:][125][125]
         plt.plot(data)
         plt.show()
@@ -30,7 +31,7 @@ class RainGui(QtGui.QDialog):
 
     def load(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, "Open rain file", "Open new file", self.tr("Text Files (*.nc)"))
-        self.module.setParameterValue("FileName", filename)
-        self.ui.le_r.setText(self.module.getParameterAsString("FileName"))
+        self.ui.le_r.setText(filename)
+        self.save_values
 
 
