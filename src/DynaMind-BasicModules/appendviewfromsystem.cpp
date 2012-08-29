@@ -22,6 +22,10 @@ void AppendViewFromSystem::run() {
         DM::System * sys = this->getData(d);
         if (sys == 0)
             continue;
+        DM::ComponentMap cm = sys->getAllComponents();
+        for (DM::ComponentMap::const_iterator it = cm.begin(); it != cm.end(); ++it ){
+            sys_out->addComponent(new DM::Component(*(it->second)));
+        }
         DM::NodeMap nm = sys->getAllNodes();
         for (DM::NodeMap::const_iterator it = nm.begin(); it != nm.end(); ++it ){
             sys_out->addNode(new DM::Node(*(it->second)));
@@ -55,10 +59,6 @@ void AppendViewFromSystem::init()
         bool changed = false;
         foreach (std::string s, Inports) {
             DM::System * sys = this->getData(s);
-            if (s.compare("ConAfterGen") == 0) {
-                std::cout << "Fuck You" << std::endl;
-
-           }
             if (sys != 0) {
                 foreach (std::string v, sys->getNamesOfViews()) {
                     if (std::find(existingViews.begin(), existingViews.end(), v) == existingViews.end()) {
