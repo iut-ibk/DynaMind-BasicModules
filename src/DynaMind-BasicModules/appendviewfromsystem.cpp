@@ -98,10 +98,10 @@ void AppendViewFromSystem::init()
         this->addData(s, data);
     }
     sizeold = Inports.size();
-
-
 }
-bool AppendViewFromSystem::createInputDialog() {
+
+bool AppendViewFromSystem::createInputDialog()
+{
     QWidget * w = new GUIAppendViewFromSystem(this);
     w->show();
     return true;
