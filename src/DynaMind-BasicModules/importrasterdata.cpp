@@ -29,6 +29,9 @@
 #include <QFile>
 #include <QTextStream>
 #include <QStringList>
+#include <dm.h>
+#include <dmview.h>
+#include <dmcomponent.h>
 DM_DECLARE_NODE_NAME(ImportRasterData, Modules)
 ImportRasterData::ImportRasterData()
 {
@@ -51,12 +54,17 @@ void ImportRasterData::init()
     if (dataname.compare(dataname_old) == 0)
         return;
     DM::View data(dataname, DM::RASTERDATA, DM::WRITE);
+
     std::vector<DM::View> vdata;
     vdata.push_back(data);
     dataname_old = dataname;
+
+    Coords = DM::View("CoordOffset",DM::COMPONENT, DM::WRITE);
+    Coords.addAttribute("Xoffset");
+    Coords.addAttribute("Yoffset");
+    vdata.push_back(Coords);
+
     this->addData("Data", vdata);
-
-
 }
 
 void ImportRasterData::run()
@@ -65,7 +73,10 @@ void ImportRasterData::run()
     DM::RasterData * r = this->getRasterData("Data", data);
     QFile file(QString::fromStdString(FileName));
 
+    DM::System * sys = this->getData("Data");
 
+    DM::Component * cmp = new DM::Component();
+    sys->addComponent(cmp,Coords);
     QTextStream stream(&file);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
          DM::Logger(DM::Error) << "warning, read input file ";
@@ -78,6 +89,8 @@ void ImportRasterData::run()
     int rowCounter = 0;
     int ncols = 0;
     int nrows = 0;
+    double xoffset = 0;
+    double yoffset = 0;
     double cellsize = 0;
     double NoDataValue = -9999; //default
 
@@ -96,6 +109,20 @@ void ImportRasterData::run()
             QString s = QString(list[1]);
             s.replace(",", ".");
             nrows = s.toInt();
+        }
+        if (LineCounter == 3) {
+            QStringList list = line.split(QRegExp("\\s+"));
+            QString s = QString(list[1]);
+            s.replace(",", ".");
+            xoffset = s.toDouble();
+            cmp->addAttribute("Xoffset",xoffset);
+        }
+        if (LineCounter == 4) {
+            QStringList list = line.split(QRegExp("\\s+"));
+            QString s = QString(list[1]);
+            s.replace(",", ".");
+            yoffset = s.toDouble();
+            cmp->addAttribute("Yoffset",yoffset);
         }
         if (LineCounter == 5) {
             QStringList list = line.split(QRegExp("\\s+"));
