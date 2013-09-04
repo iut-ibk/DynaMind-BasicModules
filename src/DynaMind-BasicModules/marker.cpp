@@ -257,7 +257,7 @@ void Marker::run() {
         vIdentifier = DM::View(param.Identifier, DM::EDGE, DM::READ);
     sys_in = this->getData("Data");
     this->OutputMap = this->getRasterData("Result", DM::View("result", DM::RASTERDATA, DM::WRITE));
-    this->OutputMap->setSize(param.Width, param.Height, param.CellSize);
+    this->OutputMap->setSize(param.Width, param.Height, param.CellSize,param.CellSize,0,0);
     this->OutputMap->clear();
 
     //Init MuParser

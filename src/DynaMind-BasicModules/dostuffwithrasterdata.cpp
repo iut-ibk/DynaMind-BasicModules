@@ -47,7 +47,7 @@ DoStuffWithRasterData::DoStuffWithRasterData()
 
 void DoStuffWithRasterData::run() {
     rasterdatain = this->getRasterData("RasterData", rdata);
-    Logger(Debug) << "Cellsize: " << rasterdatain->getCellSize();
+    Logger(Debug) << "Cellsize: " << rasterdatain->getCellSizeX();
 
 
 }
