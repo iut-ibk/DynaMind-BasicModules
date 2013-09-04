@@ -30,3 +30,4 @@ The module loads data from following sources into DynaMind
 |                   | first attribute in data set  | double or string | write | data type depends on type attribute type of the source |
  | second attribute in data set  | double or string | write |  |
  | n attribute in data set  | double or string | write |  |
+ 
