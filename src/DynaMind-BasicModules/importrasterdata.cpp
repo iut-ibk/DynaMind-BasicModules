@@ -151,9 +151,9 @@ void ImportRasterData::run()
                 QString s = QString(list[i]);
                 s.replace(",", ".");
                 if (flip)
-                    r->setValue(i, nrows-rowCounter-1, s.toDouble());
+                    r->setCell(i, nrows-rowCounter-1, s.toDouble());
                 else
-                    r->setValue(i, rowCounter, s.toDouble());
+                    r->setCell(i, rowCounter, s.toDouble());
             }
             rowCounter++;
 
