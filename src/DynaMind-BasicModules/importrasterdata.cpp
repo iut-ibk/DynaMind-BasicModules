@@ -38,7 +38,7 @@ ImportRasterData::ImportRasterData()
     multiplier = 1;
     flip = true;
     FileName = "";
-    dataname = "";
+    dataname = "Imp";
     dataname_old = "";
 
     this->addParameter("Filename", DM::FILENAME, &FileName);
