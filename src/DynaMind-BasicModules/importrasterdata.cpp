@@ -34,6 +34,8 @@
 #include <dmcomponent.h>
 #include <QFileDialog>
 #include "importrasterdata_gui.h"
+#include <QFileDialog>
+
 
 DM_DECLARE_NODE_NAME(ImportRasterData, Modules)
 ImportRasterData::ImportRasterData()
@@ -81,6 +83,12 @@ bool ImportRasterData::createInputDialog()
 string ImportRasterData::getFilename()
 {
     return this->FileName;
+}
+
+ImportRasterData::~ImportRasterData()
+{
+    if(QFile::exists(QString(QDir::currentPath() + QString("/impfile.txt"))))
+        QFile::remove(QString(QDir::currentPath() + QString("/impfile.txt")));
 }
 
 

@@ -46,6 +46,7 @@ public:
     void init();
     virtual bool createInputDialog();
     std::string getFilename();
+    ~ImportRasterData();
 
 };
 
