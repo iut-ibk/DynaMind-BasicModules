@@ -32,6 +32,9 @@
 #include <dm.h>
 #include <dmview.h>
 #include <dmcomponent.h>
+#include <QFileDialog>
+#include "importrasterdata_gui.h"
+
 DM_DECLARE_NODE_NAME(ImportRasterData, Modules)
 ImportRasterData::ImportRasterData()
 {
@@ -49,6 +52,7 @@ ImportRasterData::ImportRasterData()
 
 void ImportRasterData::init()
 {
+
     if (dataname.empty())
         return;
     if (dataname.compare(dataname_old) == 0)
@@ -66,6 +70,19 @@ void ImportRasterData::init()
 
     this->addData("Data", vdata);
 }
+
+bool ImportRasterData::createInputDialog()
+{
+    QWidget * w = new ImportRasterData_Gui(this);
+    w->show();
+    return true;
+}
+
+string ImportRasterData::getFilename()
+{
+    return this->FileName;
+}
+
 
 void ImportRasterData::run()
 {

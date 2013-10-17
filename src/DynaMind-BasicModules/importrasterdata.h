@@ -44,6 +44,9 @@ public:
     ImportRasterData();
     void run();
     void init();
+    virtual bool createInputDialog();
+    std::string getFilename();
+
 };
 
 #endif // IMPORTRASTERDATA_H

@@ -1,7 +1,8 @@
 FILE(GLOB MODULE_CPPS *.cpp)
 FILE(GLOB MODULE_UI_FILES *.ui)
 FILE(GLOB MODULE_CPPS *.cpp ../3dparty/muparser/src/*.cpp)
-SET(MOC_MODULE_FILES guidynamicinout.h
+SET(MOC_MODULE_FILES importrasterdata_gui.h
+                     guidynamicinout.h
                      guigrouptest.h
                      guicellularautomata.h
                      guicellularautomata_neighbourhood.h
