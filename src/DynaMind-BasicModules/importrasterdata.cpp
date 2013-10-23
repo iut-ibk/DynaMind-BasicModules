@@ -87,8 +87,8 @@ string ImportRasterData::getFilename()
 
 ImportRasterData::~ImportRasterData()
 {
-    if(QFile::exists(QString(QDir::currentPath() + QString("/impfile.txt"))))
-        QFile::remove(QString(QDir::currentPath() + QString("/impfile.txt")));
+//    if(QFile::exists(QString(QDir::currentPath() + QString("/impfile.txt"))))
+//        QFile::remove(QString(QDir::currentPath() + QString("/impfile.txt")));
 }
 
 
