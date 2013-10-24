@@ -3,6 +3,7 @@
 #include "importrasterdata.h"
 #include <QFileDialog>
 #include <QTextStream>
+#include <QSettings>
 
 
 
@@ -22,7 +23,9 @@ ImportRasterData_Gui::~ImportRasterData_Gui()
 
 void ImportRasterData_Gui::on_pb_load_clicked()
 {
-    QString fname = QFileDialog::getOpenFileName(this,"Map jpeg",QDir::currentPath(),"*.txt");
+    QSettings settings;
+    QString workdir = QString(settings.value("workPath").toString());
+    QString fname = QFileDialog::getOpenFileName(this,"Map jpeg",workdir,"*.txt");
     if (fname == "")
         return;
     ui->le_Filename->setText(fname);
@@ -31,12 +34,14 @@ void ImportRasterData_Gui::on_pb_load_clicked()
 
 void ImportRasterData_Gui::on_bBox_accepted()
 {
-        QFile tmpfile(QDir::currentPath()+"/impfile.txt");
-         if(tmpfile.open(QIODevice::WriteOnly | QIODevice::Text))
-         {
-             QTextStream outstream (&tmpfile);
-             outstream << ui->le_Filename->text() << endl;
-         }
-         tmpfile.close();
+    QSettings settings;
+    QString workdir = QString(settings.value("workPath").toString());
+    QFile tmpfile(workdir+"/impfile.txt");
+     if(tmpfile.open(QIODevice::WriteOnly | QIODevice::Text))
+     {
+         QTextStream outstream (&tmpfile);
+         outstream << ui->le_Filename->text() << endl;
+     }
+     tmpfile.close();
 }
 
