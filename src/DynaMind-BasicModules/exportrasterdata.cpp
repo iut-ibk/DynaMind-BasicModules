@@ -30,7 +30,12 @@ void ExportRasterData::run () {
 	QString fullFileName =   QString::fromStdString(FileName)+  QString::fromStdString(s.str()) +extension;
 	std::fstream txtout;
 
+#if QT_VERSION >= 0x050000
+	txtout.open(fullFileName.toLatin1(),std::ios::out);;
+#else
 	txtout.open(fullFileName.toAscii(),std::ios::out);
+#endif
+
 
 	//header for ARCGIS import
 

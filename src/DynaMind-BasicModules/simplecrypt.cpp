@@ -139,20 +139,32 @@ QString SimpleCrypt::encryptToString(const QString& plaintext)
 {
 	QByteArray plaintextArray = plaintext.toUtf8();
 	QByteArray cypher = encryptToByteArray(plaintextArray);
+#if QT_VERSION >= 0x050000
+	QString cypherString = QString::fromLatin1(cypher.toBase64());
+#else
 	QString cypherString = QString::fromAscii(cypher.toBase64());
+#endif
 	return cypherString;
 }
 
 QString SimpleCrypt::encryptToString(QByteArray plaintext)
 {
 	QByteArray cypher = encryptToByteArray(plaintext);
+#if QT_VERSION >= 0x050000
+	QString cypherString = QString::fromLatin1(cypher.toBase64());
+#else
 	QString cypherString = QString::fromAscii(cypher.toBase64());
+#endif
 	return cypherString;
 }
 
 QString SimpleCrypt::decryptToString(const QString &cyphertext)
 {
+#if QT_VERSION >= 0x050000
+	QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toLatin1());
+#else
 	QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toAscii());
+#endif
 	QByteArray plaintextArray = decryptToByteArray(cyphertextArray);
 	QString plaintext = QString::fromUtf8(plaintextArray, plaintextArray.size());
 
@@ -169,7 +181,11 @@ QString SimpleCrypt::decryptToString(QByteArray cypher)
 
 QByteArray SimpleCrypt::decryptToByteArray(const QString& cyphertext)
 {
+#if QT_VERSION >= 0x050000
+	QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toLatin1());
+#else
 	QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toAscii());
+#endif
 	QByteArray ba = decryptToByteArray(cyphertextArray);
 
 	return ba;

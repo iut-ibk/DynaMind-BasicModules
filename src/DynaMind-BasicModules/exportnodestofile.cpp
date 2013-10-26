@@ -27,7 +27,12 @@ void ExportNodesToFile::run() {
 
 	QString fileName = QString::fromStdString(this->FileName);
 	std::fstream out;
+#if QT_VERSION >= 0x050000
+	out.open(fileName.toLatin1(),fstream::out | fstream::app);
+#else
 	out.open(fileName.toAscii(),fstream::out | fstream::app);
+#endif
+
 
 	foreach (std::string s, sys->getUUIDsOfComponentsInView(readview)) {
 		DM::Node * n = sys->getNode(s);
