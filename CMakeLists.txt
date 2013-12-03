@@ -35,6 +35,7 @@ ENDIF()
 
 IF(NOT WITH_QT5)
     FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+    INCLUDE(${QT_USE_FILE})
 ELSE()
     FIND_PACKAGE(Qt5 COMPONENTS Core Widgets GUI)
 ENDIF()
@@ -53,7 +54,7 @@ else()
 	message(STATUS "OpenMP is disabled. Consider using a compiler that supports OpenMP")
 endif()
 
-#INCLUDE(${QT_USE_FILE})
+
 INCLUDE_DIRECTORIES( ${DYNAMIND_INCLUDE_DIR})
 
 IF(CMAKE_BUILD_TYPE STREQUAL Debug)
