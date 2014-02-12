@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QSettings>
+#include <QMessageBox>
 
 
 
@@ -25,11 +26,26 @@ void ImportRasterData_Gui::on_pb_load_clicked()
 {
     QSettings settings;
     QString workdir = QString(settings.value("workPath").toString());
-    QString fname = QFileDialog::getOpenFileName(this,"Map jpeg",workdir,"*.txt");
+    QString datadir = QString(settings.value("dataPath").toString());
+    QString fname = QFileDialog::getOpenFileName(this,"Map jpeg",datadir,"*.txt");
     if (fname == "")
+        return;    
+    QFile file(fname);
+    if (!file.exists())
+    {
+        QMessageBox::warning(NULL,"Error",QString("Could not open file %1").arg(fname));
         return;
-    ui->le_Filename->setText(fname);
-    this->ird->setParameterValue("Filename",fname.toStdString());
+    }
+    QString bfname=QFileInfo(file).fileName();
+    QString fi=workdir+"/"+bfname;
+    if (!file.copy(fi))
+    {
+        QMessageBox::warning(NULL,"Error",QString("Could not copy file %1 to %2").arg(fname).arg(fi));
+        return;
+    }
+
+    ui->le_Filename->setText(bfname);
+    this->ird->setParameterValue("Filename",bfname.toStdString());
 }
 
 void ImportRasterData_Gui::on_bBox_accepted()
