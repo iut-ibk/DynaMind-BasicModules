@@ -40,6 +40,7 @@ private:
     std::string dataname;
     std::string dataname_old;
     DM::View Coords;
+
 public:
     ImportRasterData();
     void run();
@@ -47,7 +48,7 @@ public:
     virtual bool createInputDialog();
     std::string getFilename();
     ~ImportRasterData();
-
+    std::string workingDir;
 };
 
 #endif // IMPORTRASTERDATA_H

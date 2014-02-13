@@ -35,6 +35,7 @@
 #include <QFileDialog>
 #include "importrasterdata_gui.h"
 #include <QFileDialog>
+#include <QSettings>
 
 
 DM_DECLARE_NODE_NAME(ImportRasterData, Modules)
@@ -54,7 +55,6 @@ ImportRasterData::ImportRasterData()
 
 void ImportRasterData::init()
 {
-
     if (dataname.empty())
         return;
     if (dataname.compare(dataname_old) == 0)
@@ -94,9 +94,14 @@ ImportRasterData::~ImportRasterData()
 
 void ImportRasterData::run()
 {
+    QSettings settings;
+    workingDir = settings.value("workPath").toString().toStdString();
+
     DM::View data(dataname, DM::RASTERDATA, DM::WRITE);
     DM::RasterData * r = this->getRasterData("Data", data);
-    QFile file(QString::fromStdString(FileName));
+    QString p=QString(workingDir.c_str())+"/"+QString::fromStdString(FileName);
+    QFile file(p);
+    DM::Logger(DM::Error) << "raster: "<<p;
 
     DM::System * sys = this->getData("Data");
 
