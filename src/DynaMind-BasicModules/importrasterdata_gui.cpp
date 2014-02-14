@@ -38,14 +38,19 @@ void ImportRasterData_Gui::on_pb_load_clicked()
     }
     QString bfname=QFileInfo(file).fileName();
     QString fi=workdir+"/"+bfname;
-    if (!file.copy(fi))
+    QFileInfo workfinfo = QFileInfo(fi);
+    QFileInfo finfo = QFileInfo(fi);
+    if(finfo.absolutePath() != workfinfo.absolutePath())
     {
-        QMessageBox::warning(NULL,"Error",QString("Could not copy file %1 to %2").arg(fname).arg(fi));
-        return;
+        if (!file.copy(fi))
+        {
+            QMessageBox::warning(NULL,"Error",QString("Could not copy file %1 to %2").arg(fname).arg(fi));
+            return;
+        }
     }
-
     ui->le_Filename->setText(bfname);
     this->ird->setParameterValue("Filename",bfname.toStdString());
+    settings.setValue("dataPath",finfo.absolutePath());
 }
 
 void ImportRasterData_Gui::on_bBox_accepted()
