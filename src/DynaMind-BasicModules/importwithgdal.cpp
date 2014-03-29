@@ -100,6 +100,8 @@ DM::Node * ImportwithGDAL::addNode(DM::System * sys, double x, double y, double 
 
 void ImportwithGDAL::appendAttributes(Component *cmp, OGRFeatureDefn *poFDefn, OGRFeature *poFeature)
 {
+
+	cmp->addAttribute("FEATURE_ID", poFeature->GetFID());
 	for( int iField = 0; iField < poFDefn->GetFieldCount(); iField++ )
 	{
 		OGRFieldDefn *poFieldDefn = poFDefn->GetFieldDefn( iField );
@@ -433,6 +435,8 @@ void ImportwithGDAL::vectorDataInit(OGRLayer *poLayer)
 				return;
 			}
 			view.setAccessType(DM::WRITE);
+			//Add Feature ID
+			view.addAttribute("FEATURE_ID");
 			DM::Logger(DM::Debug) << "Found: Geometry type" << strType;
 			OGRFeature::DestroyFeature( poFeature );
 		}
