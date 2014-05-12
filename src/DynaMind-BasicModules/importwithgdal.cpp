@@ -31,12 +31,14 @@
 #include <guiimportwithgdal.h>
 #include <algorithm>
 #include <QHash>
+#include <tbvectordata.h>
 
 DM_DECLARE_NODE_NAME(ImportwithGDAL, Modules)
 
 ImportwithGDAL::ImportwithGDAL()
 {
 	driverType = ShapeFile;
+	this->addParameter("DriverType", DM::INT, &this->driverType);
 
 	this->FileName = "";
 	this->addParameter("Filename", DM::FILENAME, &this->FileName);
@@ -75,6 +77,17 @@ ImportwithGDAL::ImportwithGDAL()
 
 	fileok = false;
 
+	//PostGIS
+	this->PostGISServer = "localhost";
+	this->addParameter("PostGISServer", DM::STRING, &this->PostGISServer);
+	this->PGDatabase = "Melbourne";
+	this->addParameter("PGDatabase", DM::STRING, &this->PGDatabase);
+	this->PGTable = "property_view";
+	this->addParameter("PGTable", DM::STRING, &this->PGTable);
+	this->attribute_filter = "";
+	this->addParameter("attribute_filter", DM::STRING, &this->attribute_filter);
+	this->view_filter = "";
+	this->addParameter("view_filter", DM::STRING, &this->view_filter);
 
 	poCT = NULL;
 }
@@ -83,6 +96,80 @@ ImportwithGDAL::~ImportwithGDAL()
 	reset();
 }
 
+OGRLayer * ImportwithGDAL::initPostGISServer(OGRDataSource *poDS, std::string DBName, std::string host, std::string table, std::string attribute_filter, OGRGeometry * spatial_filter)
+{
+	OGRRegisterAll();
+	//create server name
+	std::stringstream servername;
+	servername << "PG:";
+	servername << "dbname=";
+	servername << DBName;
+	servername << " host=";
+	servername << host;
+	servername << " port=5432";
+	servername << "";
+
+	this->server_full_name = servername.str();
+	std::cout << servername.str() << std::endl;
+	OGRSFDriverRegistrar::GetRegistrar()->GetDriverCount();
+	poDS = OGRSFDriverRegistrar::Open( server_full_name.c_str(), FALSE );
+	//for (int i = 0; i < poDS->GetLayerCount(); i++) {
+	//	std::cout << poDS->GetLayer(i)->GetName() << std::endl;
+	//}
+	OGRLayer *poLayer = poDS->GetLayerByName(table.c_str());
+
+	if (!poLayer) {
+		Logger(Error) << "Something went wrong while loading layer in ImportVectorData";
+		return 0;
+		//OGRDataSource::DestroyDataSource(poDS);
+	}
+	poLayer->ResetReading();
+
+	//	double sum = 0;
+	//	int counter = 0;
+	if (!attribute_filter.empty())
+		poLayer->SetAttributeFilter(attribute_filter.c_str());
+	if (spatial_filter != NULL)
+		poLayer->SetSpatialFilter(spatial_filter);
+	//std::cout << "Loading Done" << std::endl;
+	return poLayer;
+}
+
+
+
+OGRGeometry *ImportwithGDAL::convertFaceToOGRGeometry(Face *f)
+{
+	OGRPolygon  * geom = new OGRPolygon();
+
+	OGRLinearRing * ring = new OGRLinearRing();
+	std::vector<Node*> nodes =  f->getNodePointers();
+	nodes.push_back(nodes[0]);
+	foreach (DM::Node * n, nodes) {
+		ring->addPoint(n->getX(), n->getY(), n->getZ());
+	}
+	geom->addRing(ring);
+	return geom;
+}
+
+std::string ImportwithGDAL::getPostGISServer() const
+{
+	return PostGISServer;
+}
+
+void ImportwithGDAL::setPostGISServer(const std::string &value)
+{
+	PostGISServer = value;
+}
+
+std::string ImportwithGDAL::getDatabase() const
+{
+	return PGDatabase;
+}
+
+void ImportwithGDAL::setDatabase(const std::string &value)
+{
+	PGDatabase = value;
+}
 DM::Node * ImportwithGDAL::addNode(DM::System * sys, double x, double y, double z) {
 	//CreateKey
 	DM::Node n_tmp(x,y,z);
@@ -174,6 +261,7 @@ std::vector<Node*> ImportwithGDAL::ExtractNodesFromFace(System* sys, OGRLinearRi
 		lr->getPoint(i, &poPoint);
 		double x = poPoint.getX();
 		double y = poPoint.getY();
+		if (this->driverType != PostGIS)
 		transform(&x,&y);
 		DM::Node * n = this->addNode(sys, x + this->offsetX, y +  this->offsetY, 0);
 
@@ -293,8 +381,8 @@ QString ImportwithGDAL::createHash(double x, double y)
 }
 
 void ImportwithGDAL::init() {
-	if (!moduleParametersChanged())
-		return;
+	//	if (!moduleParametersChanged())
+	//		return;
 
 	if (!this->WFSServer.empty())
 	{
@@ -326,6 +414,20 @@ void ImportwithGDAL::init() {
 		view.setName(ViewName);
 		this->vectorDataInit(poLayer);
 		OGRDataSource::DestroyDataSource(poDS);
+		return;
+	}
+	else if (driverType == PostGIS) {
+		OGRDataSource *poDS;
+		OGRLayer* poLayer = initPostGISServer(poDS, this->PGDatabase, this->PostGISServer, this->PGTable);
+		view = DM::View();
+		view.setName(ViewName);
+		std::cout <<  "Start init" << std::endl;
+		if (poLayer == 0) {
+			Logger(Error)<< "Init postgis went wrong";
+		}
+		this->vectorDataInit(poLayer);
+		//OGRDataSource::DestroyDataSource(poDS);
+		std::cout << "PostGIS" << std::endl;
 		return;
 	}
 	else
@@ -533,21 +635,36 @@ bool ImportwithGDAL::importVectorData()
 
 	OGRRegisterAll();
 
-	OGRDataSource *poDS = OGRSFDriverRegistrar::Open( FileName.c_str(), FALSE );
-	if( !poDS )
-	{
-		DM::Logger(DM::Error) << "Open failed.";
-		return false;
-	}
+	OGRDataSource *poDS = 0;
+	OGRLayer *poLayer = 0;
 
-	OGRLayer *poLayer = poDS->GetLayer(0);
+	if (this->driverType != PostGIS) {
+		poDS = OGRSFDriverRegistrar::Open( FileName.c_str(), FALSE );
+		if( !poDS )
+		{
+			DM::Logger(DM::Error) << "Open failed.";
+			return false;
+		}
+
+		poLayer = poDS->GetLayer(0);
+		poLayer->ResetReading();
+
+	}
+	else {
+		OGRGeometry * geom = 0;
+		if (!this->view_filter.empty()) {
+			mforeach(DM::Component * cmp,sys->getAllComponentsInView(DM::View(this->view_filter, DM::FACE, DM::READ))) {
+				geom = this->convertFaceToOGRGeometry((DM::Face*) cmp);
+			}
+		}
+		poLayer = initPostGISServer(poDS, this->PGDatabase, this->PostGISServer, this->PGTable, this->attribute_filter, geom);
+	}
 	if (!poLayer) {
 		Logger(Error) << "Something went wrong while loading layer in ImportVectorData";
 		OGRDataSource::DestroyDataSource(poDS);
 		return false;
 	}
 
-	poLayer->ResetReading();
 
 	// GetSpatialRef: The returned object is owned by the OGRLayer and should not be modified or freed by the application.
 	oSourceSRS = poLayer->GetSpatialRef();
@@ -561,11 +678,11 @@ bool ImportwithGDAL::importVectorData()
 	if(poCT == NULL)
 	{
 		transformok = false;
-        DM::Logger(DM::Warning) << "Unknown transformation to EPSG:" << this->epsgcode;
+		DM::Logger(DM::Warning) << "Unknown transformation to EPSG:" << this->epsgcode;
 	}
 	else
 		transformok = true;
-
+	int counter = 0;
 	while( OGRFeature* poFeature = poLayer->GetNextFeature() )
 	{
 		OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
@@ -579,16 +696,29 @@ bool ImportwithGDAL::importVectorData()
 			cmp = this->loadEdge(sys, poFeature);
 			break;
 		case DM::FACE:
+			if (this->driverType != 10) {
 			cmp = this->loadFace(sys, poFeature);
+			} else {
+				cmp = 0;
+			}
 			break;
 		}
+		counter++;
+//		if (counter == 200){
+//			std::cout << counter << std::endl;
+//			OGRDataSource::DestroyDataSource(poDS);
+//			int features_after =  sys->getUUIDs(this->view).size();
+//			Logger(Error) << "Loaded featuers "<< features_after - features_before;
+//			return true;
+//		}
 		if (cmp)
 			this->appendAttributes(cmp, poFDefn, poFeature);
 		//OGRFeature::DestroyFeature( poFeature );
 	}
+	std::cout << counter << std::endl;
 	OGRDataSource::DestroyDataSource(poDS);
 	int features_after =  sys->getUUIDs(this->view).size();
-	Logger(Debug) << "Loaded featuers "<< features_after - features_before;
+	Logger(Error) << "Loaded featuers "<< features_after - features_before;
 	return true;
 }
 
@@ -750,3 +880,13 @@ OGRLayer *ImportwithGDAL::LoadWFSLayer(OGRDataSource *poDS)
 	}
 	return 0;
 }
+int ImportwithGDAL::getDriverType() const
+{
+	return driverType;
+}
+
+void ImportwithGDAL::setDriverType(int value)
+{
+	driverType = value;
+}
+

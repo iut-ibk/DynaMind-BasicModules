@@ -29,12 +29,20 @@
 #include <dmmodule.h>
 #include <dm.h>
 #include "ogrsf_frmts.h"
+#include "ogr_geometry.h"
 #include "gdal_priv.h"
 #include <QHash>
 #include <QString>
 
 
 using namespace DM;
+
+enum DRIVERTYPE {
+	ShapeFile,
+	WFS,
+	PostGIS
+};
+
 
 class DM_HELPER_DLL_EXPORT ImportwithGDAL : public Module
 {
@@ -51,6 +59,12 @@ public:
 	std::string WFSServer;
 	std::string WFSUsername;
 	std::string WFSPassword;
+
+	std::string PostGISServer;
+	std::string PGDatabase;
+	std::string PGTable;
+	std::string attribute_filter;
+	std::string view_filter;
 
 	bool append;
 	int epsgcode;
@@ -72,8 +86,6 @@ private:
 	std::string WFSPassword_old;
 
 	bool append_old;
-
-
 
 	DM::View view;
 	double devider;
@@ -104,11 +116,6 @@ private:
 
 	OGRLayer* LoadWFSLayer(OGRDataSource *poDS);
 
-	enum DRIVERTYPE {
-		ShapeFile,
-		WFS
-	};
-
 	int driverType;
 public:
 	void run();
@@ -117,6 +124,17 @@ public:
 	string getHelpUrl();
 	ImportwithGDAL();
 	~ImportwithGDAL();
+	void test_writing();
+
+	OGRLayer * initPostGISServer(OGRDataSource *poDS, std::string DBName, std::string host, std::string table, std::string filter = "", OGRGeometry * spatial_filter = NULL);
+	OGRGeometry * convertFaceToOGRGeometry(DM::Face * f);
+
+	std::string getPostGISServer() const;
+	void setPostGISServer(const std::string &value);
+	std::string getDatabase() const;
+	void setDatabase(const std::string &value);
+	int getDriverType() const;
+	void setDriverType(int value);
 };
 
 #endif // IMPORTWITHGDAL_H

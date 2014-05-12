@@ -4,8 +4,28 @@
 #include "attributecalculator.h"
 #include "offsetface.h"
 #include "cgalgeometry.h"
+#include "importwithgdal.h"
+#include <ogr_geometry.h>
 
 #include <QString>
+DM::Face * selection(DM::System * sys)
+{
+	DM::Node * n1 = sys->addNode(DM::Node(145.064,-37.892 ,0));
+	DM::Node * n2 = sys->addNode(DM::Node(145.093,-37.892,0));
+	DM::Node * n3 = sys->addNode(DM::Node(145.093,-37.870,0));
+	DM::Node * n4 = sys->addNode(DM::Node(145.064,-37.870,0));
+
+	std::vector<DM::Node * > nodes;
+	nodes.push_back(n1);
+	nodes.push_back(n2);
+	nodes.push_back(n3);
+	nodes.push_back(n4);
+
+	DM::Face * f1 = sys->addFace(nodes);
+
+	return f1;
+}
+
 
 DM::Face * addRectangle(DM::System* sys, DM::View v)
 {
@@ -27,6 +47,35 @@ DM::Face * addRectangle(DM::System* sys, DM::View v)
 
 /** Unit test for https://github.com/iut-ibk/DynaMind-ToolBox/issues/221
  */
+TEST_F(UnitTestsBasicModules, FaceToOGR) {
+		ImportwithGDAL imp_gdal;
+	imp_gdal.test_writing();
+	/*ostream *out = &cout;
+	DM::Log::init(new DM::OStreamLogSink(*out), DM::Standard);
+
+	DM::System * sys = new DM::System();
+
+		ImportwithGDAL imp_gdal;
+	OGRGeometry * geom = imp_gdal.convertFaceToOGRGeometry(selection(sys));
+	geom->getBoundary();*/
+}
+
+TEST_F(UnitTestsBasicModules, ConnectToPostGIS) {
+	ImportwithGDAL imp_gdal;
+	imp_gdal.initPostGISServer("Melbourne", "localhost", "gid < 1000");
+}
+
+TEST_F(UnitTestsBasicModules, SpatialSelection) {
+	ostream *out = &cout;
+	DM::Log::init(new DM::OStreamLogSink(*out), DM::Standard);
+
+	DM::System * sys = new DM::System();
+	ImportwithGDAL imp_gdal;
+	imp_gdal.initPostGISServer("Melbourne", "localhost", "", imp_gdal.convertFaceToOGRGeometry(selection(sys)));
+}
+
+/** Unit test for https://github.com/iut-ibk/DynaMind-ToolBox/issues/221
+ */
 TEST_F(UnitTestsBasicModules, AttributeCalculatorTranslate) {
 	AttributeCalculator attrc;
 	std::string exp = attrc.IfElseConverter("if(a==1,0,if(b==2,1,3))").toStdString();
@@ -38,7 +87,7 @@ TEST_F(UnitTestsBasicModules, AttributeCalculatorTranslate) {
 
 /** Unit offsetFace
  */
-TEST_F(UnitTestsBasicModules, OffsetFace) {
+/*TEST_F(UnitTestsBasicModules, OffsetFace) {
 	OffsetFace of;
 
 	ostream *out = &cout;
@@ -59,6 +108,6 @@ TEST_F(UnitTestsBasicModules, OffsetFace) {
 
 	f_out = of.createOffest(sys, f, 0.6);
 	EXPECT_TRUE(f_out == NULL);
-}
+}*/
 
 
