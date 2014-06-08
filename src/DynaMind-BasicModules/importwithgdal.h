@@ -63,11 +63,14 @@ public:
 	std::string PostGISServer;
 	std::string PGDatabase;
 	std::string PGTable;
+	std::string PGUsername;
+	std::string PGPassword;
 	std::string attribute_filter;
 	std::string view_filter;
 
 	bool append;
 	int epsgcode;
+	int epsgcode_import;
 	bool linkWithExistingView;
 	bool flip_wfs;
 
@@ -93,8 +96,10 @@ private:
 	bool ImportAll;
 	OGRCoordinateTransformation *poCT;
 
+	OGRCoordinateTransformation *poCT_reverse;
+
 	QHash<QString, std::vector<DM::Node* > > nodeList;
-	DM::Node * addNode(DM::System * sys, double x, double y, double z);
+	DM::Node * addNode(DM::System * sys, double x, double y, double z, string uuid = "");
 	void appendAttributes(DM::Component * cmp, OGRFeatureDefn *poFDefn, OGRFeature *poFeature);
 
 	std::vector<Node*> ExtractNodes(System* sys, OGRLineString *ls);
@@ -109,7 +114,7 @@ private:
 	void rasterDataInit(GDALDataset  *poDataset);
 	bool importVectorData();
 	bool importRasterData();
-	bool transform(double *x, double *y);
+	bool transform(double *x, double *y, bool reverse=false);
 	void reset();
 	bool moduleParametersChanged();
 	std::string server_full_name;
@@ -126,7 +131,7 @@ public:
 	~ImportwithGDAL();
 	void test_writing();
 
-	OGRLayer * initPostGISServer(OGRDataSource *poDS, std::string DBName, std::string host, std::string table, std::string filter = "", OGRGeometry * spatial_filter = NULL);
+	OGRLayer * initPostGISServer(OGRDataSource *poDS, std::string DBName, std::string host, std::string table, std::string user = "", std::string password = "", std::string filter = "", OGRGeometry * spatial_filter = NULL);
 	OGRGeometry * convertFaceToOGRGeometry(DM::Face * f);
 
 	std::string getPostGISServer() const;

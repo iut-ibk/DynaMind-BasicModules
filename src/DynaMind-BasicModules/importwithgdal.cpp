@@ -39,11 +39,12 @@ ImportwithGDAL::ImportwithGDAL()
 {
 	driverType = ShapeFile;
 	this->addParameter("DriverType", DM::INT, &this->driverType);
-
 	this->FileName = "";
 	this->addParameter("Filename", DM::FILENAME, &this->FileName);
 	this->epsgcode=31254;
 	this->addParameter("Transform to EPSG:", DM::INT, &this->epsgcode);
+	this->epsgcode_import=-1;
+	this->addParameter("EPSGSource", DM::INT, &this->epsgcode_import);
 	this->ViewName = "";
 	this->addParameter("ViewName", DM::STRING, &this->ViewName);
 	this->tol = 0.00001;
@@ -84,6 +85,15 @@ ImportwithGDAL::ImportwithGDAL()
 	this->addParameter("PGDatabase", DM::STRING, &this->PGDatabase);
 	this->PGTable = "property_view";
 	this->addParameter("PGTable", DM::STRING, &this->PGTable);
+
+	this->PGUsername = "PGUsername";
+	this->addParameter("PGUsername", DM::STRING, &this->PGUsername);
+	this->PGPassword = "PGPassword";
+	this->addParameter("PGPassword", DM::STRING, &this->PGPassword);
+
+	this->PGTable = "property_view";
+	this->addParameter("PGTable", DM::STRING, &this->PGTable);
+
 	this->attribute_filter = "";
 	this->addParameter("attribute_filter", DM::STRING, &this->attribute_filter);
 	this->view_filter = "";
@@ -96,7 +106,7 @@ ImportwithGDAL::~ImportwithGDAL()
 	reset();
 }
 
-OGRLayer * ImportwithGDAL::initPostGISServer(OGRDataSource *poDS, std::string DBName, std::string host, std::string table, std::string attribute_filter, OGRGeometry * spatial_filter)
+OGRLayer * ImportwithGDAL::initPostGISServer(OGRDataSource *poDS, std::string DBName, std::string host, std::string user, std::string password, std::string table, std::string attribute_filter, OGRGeometry * spatial_filter)
 {
 	OGRRegisterAll();
 	//create server name
@@ -106,6 +116,14 @@ OGRLayer * ImportwithGDAL::initPostGISServer(OGRDataSource *poDS, std::string DB
 	servername << DBName;
 	servername << " host=";
 	servername << host;
+	if ( !user.empty() ) {
+		servername << " user=";
+		servername << user;
+	}
+	if ( !password.empty() ) {
+		servername << " password=";
+		servername << password;
+	}
 	servername << " port=5432";
 	servername << "";
 
@@ -144,8 +162,15 @@ OGRGeometry *ImportwithGDAL::convertFaceToOGRGeometry(Face *f)
 	OGRLinearRing * ring = new OGRLinearRing();
 	std::vector<Node*> nodes =  f->getNodePointers();
 	nodes.push_back(nodes[0]);
+
 	foreach (DM::Node * n, nodes) {
-		ring->addPoint(n->getX(), n->getY(), n->getZ());
+		double x = n->getX();
+		double y = n->getY();
+		if (!this->transform(&x,&y,true)) {
+			Logger(Error) << "transform failed";
+		}
+		ring->addPoint(x,y, n->getZ());
+		Logger(Error) << x << "/" << y;
 	}
 	geom->addRing(ring);
 	return geom;
@@ -170,7 +195,7 @@ void ImportwithGDAL::setDatabase(const std::string &value)
 {
 	PGDatabase = value;
 }
-DM::Node * ImportwithGDAL::addNode(DM::System * sys, double x, double y, double z) {
+DM::Node * ImportwithGDAL::addNode(DM::System * sys, double x, double y, double z, std::string uuid) {
 	//CreateKey
 	DM::Node n_tmp(x,y,z);
 	QString key = this->createHash(x,y);
@@ -228,7 +253,7 @@ Component *ImportwithGDAL::loadNode(System *sys, OGRFeature *poFeature)
 
 	transform(&x,&y);
 
-	DM::Node * n = this->addNode(sys, x + this->offsetX, y +  this->offsetY, 0);
+	DM::Node * n = this->addNode(sys, x + this->offsetX, y + this->offsetY, 0);
 	sys->addComponentToView(n, this->view);
 
 	return n;
@@ -262,7 +287,7 @@ std::vector<Node*> ImportwithGDAL::ExtractNodesFromFace(System* sys, OGRLinearRi
 		double x = poPoint.getX();
 		double y = poPoint.getY();
 		if (this->driverType != PostGIS)
-		transform(&x,&y);
+			transform(&x,&y);
 		DM::Node * n = this->addNode(sys, x + this->offsetX, y +  this->offsetY, 0);
 
 		if(!vector_contains(&nlist, n))
@@ -418,7 +443,7 @@ void ImportwithGDAL::init() {
 	}
 	else if (driverType == PostGIS) {
 		OGRDataSource *poDS;
-		OGRLayer* poLayer = initPostGISServer(poDS, this->PGDatabase, this->PostGISServer, this->PGTable);
+		OGRLayer* poLayer = initPostGISServer(poDS, this->PGDatabase, this->PostGISServer, this->PGUsername, this->PGPassword, this->PGTable);
 		view = DM::View();
 		view.setName(ViewName);
 		std::cout <<  "Start init" << std::endl;
@@ -652,12 +677,7 @@ bool ImportwithGDAL::importVectorData()
 	}
 	else {
 		OGRGeometry * geom = 0;
-		if (!this->view_filter.empty()) {
-			mforeach(DM::Component * cmp,sys->getAllComponentsInView(DM::View(this->view_filter, DM::FACE, DM::READ))) {
-				geom = this->convertFaceToOGRGeometry((DM::Face*) cmp);
-			}
-		}
-		poLayer = initPostGISServer(poDS, this->PGDatabase, this->PostGISServer, this->PGTable, this->attribute_filter, geom);
+		poLayer = initPostGISServer(poDS, this->PGDatabase, this->PostGISServer, this->PGUsername, this->PGPassword, this->PGTable, this->attribute_filter, geom);
 	}
 	if (!poLayer) {
 		Logger(Error) << "Something went wrong while loading layer in ImportVectorData";
@@ -670,19 +690,35 @@ bool ImportwithGDAL::importVectorData()
 	oSourceSRS = poLayer->GetSpatialRef();
 	oTargetSRS = new OGRSpatialReference();
 	oTargetSRS->importFromEPSG(this->epsgcode);
+	if (this->epsgcode_import > 0) {
+		oSourceSRS->importFromEPSG(this->epsgcode_import);
+	}
 	// Input spatial reference system objects are assigned by copy
 	// (calling clone() method) and no ownership transfer occurs.
 	poCT = OGRCreateCoordinateTransformation( oSourceSRS, oTargetSRS );
+	poCT_reverse = OGRCreateCoordinateTransformation( oTargetSRS, oSourceSRS );
 	//OGRSpatialReference::DestroySpatialReference(oTargetSRS); // cannot be deleted (error)
 
 	if(poCT == NULL)
 	{
 		transformok = false;
-		DM::Logger(DM::Warning) << "Unknown transformation to EPSG:" << this->epsgcode;
+		DM::Logger(DM::Error) << "Unknown transformation to EPSG:" << this->epsgcode;
 	}
 	else
+	{
+		Logger(Error) << this->epsgcode << "/" << this->epsgcode_import;
+		Logger(Error) << oSourceSRS->GetEPSGGeogCS() << "/" << oTargetSRS->GetEPSGGeogCS();
 		transformok = true;
+	}
 	int counter = 0;
+	OGRGeometry * geom = 0;
+	if (!this->view_filter.empty()) {
+		mforeach(DM::Component * cmp,sys->getAllComponentsInView(DM::View(this->view_filter, DM::FACE, DM::READ))) {
+			geom = this->convertFaceToOGRGeometry((DM::Face*) cmp);
+		}
+	}
+	if (geom!=0)
+		poLayer->SetSpatialFilter(geom);
 	while( OGRFeature* poFeature = poLayer->GetNextFeature() )
 	{
 		OGRFeatureDefn *poFDefn = poLayer->GetLayerDefn();
@@ -697,20 +733,20 @@ bool ImportwithGDAL::importVectorData()
 			break;
 		case DM::FACE:
 			if (this->driverType != 10) {
-			cmp = this->loadFace(sys, poFeature);
+				cmp = this->loadFace(sys, poFeature);
 			} else {
 				cmp = 0;
 			}
 			break;
 		}
 		counter++;
-//		if (counter == 200){
-//			std::cout << counter << std::endl;
-//			OGRDataSource::DestroyDataSource(poDS);
-//			int features_after =  sys->getUUIDs(this->view).size();
-//			Logger(Error) << "Loaded featuers "<< features_after - features_before;
-//			return true;
-//		}
+		//		if (counter == 200){
+		//			std::cout << counter << std::endl;
+		//			OGRDataSource::DestroyDataSource(poDS);
+		//			int features_after =  sys->getUUIDs(this->view).size();
+		//			Logger(Error) << "Loaded featuers "<< features_after - features_before;
+		//			return true;
+		//		}
 		if (cmp)
 			this->appendAttributes(cmp, poFDefn, poFeature);
 		//OGRFeature::DestroyFeature( poFeature );
@@ -826,7 +862,7 @@ bool ImportwithGDAL::importRasterData()
 	return true;
 }
 
-bool ImportwithGDAL::transform(double *x, double *y)
+bool ImportwithGDAL::transform(double *x, double *y, bool reverse)
 {
 	if (this->driverType == WFS && this->flip_wfs)
 	{
@@ -837,17 +873,23 @@ bool ImportwithGDAL::transform(double *x, double *y)
 
 	if(!transformok)
 		return false;
-
-	if( poCT == NULL || !poCT->Transform( 1, x, y ) )
+	if( poCT == NULL)
 		return false;
-
-	return true;
+	if (poCT->Transform( 1, x, y ) && !reverse) {
+		return true;
+	}
+	if (poCT_reverse->Transform( 1, x, y ) && reverse) {
+		return true;
+	}
+	return false;
 }
 
 void ImportwithGDAL::reset()
 {
-	if(poCT)
+	if(poCT) {
 		delete poCT;
+		delete poCT_reverse;
+	}
 }
 
 bool ImportwithGDAL::moduleParametersChanged()
