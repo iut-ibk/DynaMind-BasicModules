@@ -131,9 +131,10 @@ OGRLayer * ImportwithGDAL::initPostGISServer(OGRDataSource *poDS, std::string DB
 	std::cout << servername.str() << std::endl;
 	OGRSFDriverRegistrar::GetRegistrar()->GetDriverCount();
 	poDS = OGRSFDriverRegistrar::Open( server_full_name.c_str(), FALSE );
-	//for (int i = 0; i < poDS->GetLayerCount(); i++) {
-	//	std::cout << poDS->GetLayer(i)->GetName() << std::endl;
-	//}
+	if (!poDS) {
+		Logger(Error) << "Server not found";
+		return 0;
+	}
 	OGRLayer *poLayer = poDS->GetLayerByName(table.c_str());
 
 	if (!poLayer) {
@@ -149,7 +150,7 @@ OGRLayer * ImportwithGDAL::initPostGISServer(OGRDataSource *poDS, std::string DB
 		poLayer->SetAttributeFilter(attribute_filter.c_str());
 	if (spatial_filter != NULL)
 		poLayer->SetSpatialFilter(spatial_filter);
-	//std::cout << "Loading Done" << std::endl;
+	std::cout << "Loading Done" << std::endl;
 	return poLayer;
 }
 
@@ -170,7 +171,6 @@ OGRGeometry *ImportwithGDAL::convertFaceToOGRGeometry(Face *f)
 			Logger(Error) << "transform failed";
 		}
 		ring->addPoint(x,y, n->getZ());
-		Logger(Error) << x << "/" << y;
 	}
 	geom->addRing(ring);
 	return geom;
@@ -286,8 +286,8 @@ std::vector<Node*> ImportwithGDAL::ExtractNodesFromFace(System* sys, OGRLinearRi
 		lr->getPoint(i, &poPoint);
 		double x = poPoint.getX();
 		double y = poPoint.getY();
-		if (this->driverType != PostGIS)
-			transform(&x,&y);
+		//		if (this->driverType != PostGIS)
+		transform(&x,&y);
 		DM::Node * n = this->addNode(sys, x + this->offsetX, y +  this->offsetY, 0);
 
 		if(!vector_contains(&nlist, n))
@@ -691,6 +691,7 @@ bool ImportwithGDAL::importVectorData()
 	oTargetSRS = new OGRSpatialReference();
 	oTargetSRS->importFromEPSG(this->epsgcode);
 	if (this->epsgcode_import > 0) {
+		oSourceSRS = new OGRSpatialReference();
 		oSourceSRS->importFromEPSG(this->epsgcode_import);
 	}
 	// Input spatial reference system objects are assigned by copy
@@ -706,8 +707,8 @@ bool ImportwithGDAL::importVectorData()
 	}
 	else
 	{
-		Logger(Error) << this->epsgcode << "/" << this->epsgcode_import;
-		Logger(Error) << oSourceSRS->GetEPSGGeogCS() << "/" << oTargetSRS->GetEPSGGeogCS();
+		Logger(Debug) << this->epsgcode_import << "/" << this->epsgcode;
+		Logger(Debug) << oSourceSRS->GetEPSGGeogCS() << "/" << oTargetSRS->GetEPSGGeogCS();
 		transformok = true;
 	}
 	int counter = 0;
@@ -754,7 +755,7 @@ bool ImportwithGDAL::importVectorData()
 	std::cout << counter << std::endl;
 	OGRDataSource::DestroyDataSource(poDS);
 	int features_after =  sys->getUUIDs(this->view).size();
-	Logger(Error) << "Loaded featuers "<< features_after - features_before;
+	Logger(Debug) << "Loaded featuers "<< features_after - features_before;
 	return true;
 }
 
@@ -875,11 +876,15 @@ bool ImportwithGDAL::transform(double *x, double *y, bool reverse)
 		return false;
 	if( poCT == NULL)
 		return false;
-	if (poCT->Transform( 1, x, y ) && !reverse) {
-		return true;
+	if (!reverse) {
+		if (poCT->Transform( 1, x, y )  ) {
+			return true;
+		}
 	}
-	if (poCT_reverse->Transform( 1, x, y ) && reverse) {
-		return true;
+	if (reverse){
+		if (poCT_reverse->Transform( 1, x, y )) {
+			return true;
+		}
 	}
 	return false;
 }
