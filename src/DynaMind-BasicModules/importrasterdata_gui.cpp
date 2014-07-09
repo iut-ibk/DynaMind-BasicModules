@@ -52,7 +52,9 @@ void ImportRasterData_Gui::on_pb_load_clicked()
             QMessageBox::warning(NULL,"Error",QString("Could not copy file %1 to %2").arg(fname).arg(fi));
             return;
         }
+
     }
+    QFile::copy(fname,fi);
     ui->le_Filename->setText(bfname);
     this->ird->setParameterValue("Filename",bfname.toStdString());
     settings.setValue("dataPath",finfo.absolutePath());
