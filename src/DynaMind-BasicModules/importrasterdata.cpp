@@ -101,7 +101,6 @@ void ImportRasterData::run()
     DM::RasterData * r = this->getRasterData("Data", data);
     QString p=QString(workingDir.c_str())+"/"+QString::fromStdString(FileName);
     QFile file(p);
-    DM::Logger(DM::Error) << "raster: "<<p;
 
     DM::System * sys = this->getData("Data");
 
