@@ -58,6 +58,8 @@ void ImportRasterData_Gui::on_pb_load_clicked()
     ui->le_Filename->setText(bfname);
     this->ird->setParameterValue("Filename",bfname.toStdString());
     settings.setValue("dataPath",finfo.absolutePath());
+    if(QFile::exists(settings.value("workPath").toString() + "/WSUDtech.mcd"));
+        QFile::remove(settings.value("workPath").toString() +"/WSUDtech.mcd");
 }
 
 void ImportRasterData_Gui::on_bBox_accepted()
