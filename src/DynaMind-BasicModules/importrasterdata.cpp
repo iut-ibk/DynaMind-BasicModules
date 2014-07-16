@@ -38,7 +38,9 @@
 #include <QSettings>
 
 
-DM_DECLARE_NODE_NAME(ImportRasterData, Modules)
+//DM_DECLARE_NODE_NAME(ImportRasterData, Modules)
+DM_DECLARE_CUSTOM_NODE_NAME(ImportRasterData,"Import Map", "Scenario Generation")
+
 ImportRasterData::ImportRasterData()
 {
     multiplier = 1;
