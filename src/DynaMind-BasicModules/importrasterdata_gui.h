@@ -18,7 +18,9 @@ public:
 private slots:
     void on_pb_load_clicked();
     void on_bBox_accepted();
-    
+    void writeDimensions();
+    void on_pb_load_2_released();
+
 private:
     Ui::ImportRasterData_Gui *ui;
     ImportRasterData *ird;

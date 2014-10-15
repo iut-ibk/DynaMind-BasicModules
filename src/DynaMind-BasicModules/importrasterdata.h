@@ -40,6 +40,14 @@ private:
     std::string dataname;
     std::string dataname_old;
     DM::View Coords;
+    DM::View MCD;
+    std::string useMCD;
+    std::string MCDFilename;
+    std::string rows;
+    std::string cols;
+    std::string cellsize;
+    std::string xoffset;
+    std::string yoffset;
 
 public:
     ImportRasterData();
@@ -47,6 +55,12 @@ public:
     void init();
     virtual bool createInputDialog();
     std::string getFilename();
+    std::string getMCDFilename();
+    std::string getrows();
+    std::string getcols();
+    std::string getcellsize();
+    std::string getxoffset();
+    std::string getyoffset();
     ~ImportRasterData();
     std::string workingDir;
 };
