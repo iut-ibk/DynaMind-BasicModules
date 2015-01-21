@@ -19,8 +19,6 @@ ImportRasterData_Gui::ImportRasterData_Gui(ImportRasterData * ird, QWidget *pare
     ui->le_cellsize->setText(this->ird->getcellsize().c_str());
     ui->le_cols->setText(this->ird->getcols().c_str());
     ui->le_rows->setText(this->ird->getrows().c_str());
-    ui->le_xoff->setText(this->ird->getxoffset().c_str());
-    ui->le_yoff->setText(this->ird->getyoffset().c_str());
     QSettings settings;
     this->ird->workingDir = settings.value("workPath").toString().toStdString();
 }
@@ -133,8 +131,6 @@ void ImportRasterData_Gui::on_bBox_accepted()
     this->ird->setParameterValue("rows",this->ui->le_rows->text().toStdString());
     this->ird->setParameterValue("cols",this->ui->le_cols->text().toStdString());
     this->ird->setParameterValue("cellsize",this->ui->le_cellsize->text().toStdString());
-    this->ird->setParameterValue("xoffset",this->ui->le_xoff->text().toStdString());
-    this->ird->setParameterValue("yoffset",this->ui->le_yoff->text().toStdString());
 
 }
 
@@ -149,8 +145,8 @@ void ImportRasterData_Gui::writeDimensions()
 
             outstream << "ncols " << ui->le_cols->text() << endl;
             outstream << "nrows " << ui->le_rows->text() << endl;
-            outstream << "xllcorner " << ui->le_xoff->text() << endl;
-            outstream << "yllcorner " << ui->le_yoff->text() << endl;
+            outstream << "xllcorner 0" << endl;
+            outstream << "yllcorner 0" << endl;
             outstream << "cellsize " << ui->le_cellsize->text() << endl;
     }
     dimfile.close();

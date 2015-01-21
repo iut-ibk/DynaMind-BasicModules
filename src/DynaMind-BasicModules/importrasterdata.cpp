@@ -53,8 +53,8 @@ ImportRasterData::ImportRasterData()
     rows = "";
     cols = "";
     cellsize= "";
-    xoffset= "";
-    yoffset= "";
+    xoffset= "0";
+    yoffset= "0";
 
     this->addParameter("Filename", DM::FILENAME, &FileName);
     this->addParameter("DataName", DM::STRING, &dataname);
