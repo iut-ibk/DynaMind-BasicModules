@@ -33,7 +33,7 @@
 #include <QStringList>
 #include <algorithm>
 
-DM_DECLARE_NODE_NAME( CellularAutomata, Modules )
+DM_DECLARE_NODE_NAME( CellularAutomata, )
 
 CellularAutomata::CellularAutomata()
 {

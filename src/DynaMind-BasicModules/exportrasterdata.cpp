@@ -3,7 +3,7 @@
 #include <sstream>
 #include <fstream>
 
-DM_DECLARE_NODE_NAME(ExportRasterData, Modules)
+DM_DECLARE_NODE_NAME(ExportRasterData, )
 
 ExportRasterData::ExportRasterData()
 {

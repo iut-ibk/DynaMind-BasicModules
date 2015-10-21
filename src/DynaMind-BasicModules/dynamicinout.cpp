@@ -27,7 +27,7 @@
 #include "dynamicinout.h"
 #include <dm.h>
 #include <guidynamicinout.h>
-DM_DECLARE_NODE_NAME (DynamicInOut, Modules)
+DM_DECLARE_NODE_NAME (DynamicInOut, )
 
 DynamicInOut::DynamicInOut()
 {

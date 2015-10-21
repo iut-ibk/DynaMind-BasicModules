@@ -32,7 +32,7 @@
 #include <QThread>
 #include <guimarker.h>
 
-DM_DECLARE_NODE_NAME( Marker, Modules )
+DM_DECLARE_NODE_NAME( Marker, )
 Marker::Marker()
 {
     param.Width = 200;

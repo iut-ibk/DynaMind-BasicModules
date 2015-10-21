@@ -30,7 +30,7 @@
 #include <rasterdatahelper.h>
 #include <guiappendattributes.h>
 
-DM_DECLARE_NODE_NAME( AppendAttributes ,Modules )
+DM_DECLARE_NODE_NAME( AppendAttributes , )
 
 
 AppendAttributes::AppendAttributes() {

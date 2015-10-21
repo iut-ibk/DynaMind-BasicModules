@@ -2,7 +2,7 @@
 #include <fstream>
 #include <QString>
 
-DM_DECLARE_NODE_NAME(ExportNodesToFile, Modules)
+DM_DECLARE_NODE_NAME(ExportNodesToFile, )
 
 ExportNodesToFile::ExportNodesToFile()
 {

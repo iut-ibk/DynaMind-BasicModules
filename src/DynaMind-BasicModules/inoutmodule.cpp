@@ -4,7 +4,7 @@
 #include <dmnode.h>
 
 
-DM_DECLARE_NODE_NAME( InOut,Modules )
+DM_DECLARE_NODE_NAME( InOut, )
 InOut::InOut() {
 
     Logger(Debug) << "Create InOut";

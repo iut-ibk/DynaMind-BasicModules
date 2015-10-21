@@ -4,7 +4,7 @@
 #include <dmnode.h>
 
 
-DM_DECLARE_NODE_NAME( InOut2,Modules )
+DM_DECLARE_NODE_NAME( InOut2, )
 InOut2::InOut2() {
 
 

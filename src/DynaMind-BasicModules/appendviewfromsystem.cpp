@@ -2,7 +2,7 @@
 #include "guiappendviewfromsystem.h"
 #include <algorithm>
 
-DM_DECLARE_NODE_NAME(AppendViewFromSystem, Modules)
+DM_DECLARE_NODE_NAME(AppendViewFromSystem, )
 
 AppendViewFromSystem::AppendViewFromSystem()
 {

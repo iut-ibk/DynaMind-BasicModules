@@ -1,7 +1,7 @@
 #include "clearview.h"
 #include <guiclearview.h>
 
-DM_DECLARE_NODE_NAME(ClearView, Modules)
+DM_DECLARE_NODE_NAME(ClearView, )
 ClearView::ClearView()
 {
     sys_in = 0;

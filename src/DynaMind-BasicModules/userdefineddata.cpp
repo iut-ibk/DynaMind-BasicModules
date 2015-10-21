@@ -26,7 +26,7 @@
 
 #include "userdefineddata.h"
 
-DM_DECLARE_NODE_NAME(UserdefinedData, Modules)
+DM_DECLARE_NODE_NAME(UserdefinedData, )
 UserdefinedData::UserdefinedData()
 {
 

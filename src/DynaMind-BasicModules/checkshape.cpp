@@ -5,7 +5,7 @@
 #include <dmnode.h>
 
 
-DM_DECLARE_NODE_NAME( CheckShape,Modules )
+DM_DECLARE_NODE_NAME( CheckShape, )
 CheckShape::CheckShape() {
     std::vector<DM::View> views;
     shape = DM::View("Shape", DM::SUBSYSTEM, DM::READ);

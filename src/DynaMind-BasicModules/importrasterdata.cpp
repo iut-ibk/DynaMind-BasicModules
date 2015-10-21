@@ -39,7 +39,7 @@
 
 
 //DM_DECLARE_NODE_NAME(ImportRasterData, Modules)
-DM_DECLARE_CUSTOM_NODE_NAME(ImportRasterData,"Import Map", "Scenario Generation")
+DM_DECLARE_CUSTOM_NODE_NAME(ImportRasterData,"Import Landcover", "Scenario Definition")
 
 ImportRasterData::ImportRasterData()
 {

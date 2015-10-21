@@ -35,7 +35,7 @@
 #include <dmnode.h>
 #include <dmview.h>
 
-DM_DECLARE_NODE_NAME( TestModule,Modules )
+DM_DECLARE_NODE_NAME( TestModule, )
 TestModule::TestModule() {
 
     inlets = DM::View("Inlets", DM::NODE, DM::WRITE);

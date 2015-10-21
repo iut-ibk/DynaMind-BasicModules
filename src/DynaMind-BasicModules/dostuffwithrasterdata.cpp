@@ -27,7 +27,7 @@
 #include "dostuffwithrasterdata.h"
 #include <dm.h>
 
-DM_DECLARE_NODE_NAME (DoStuffWithRasterData, Modules)
+DM_DECLARE_NODE_NAME (DoStuffWithRasterData, )
 
 DoStuffWithRasterData::DoStuffWithRasterData()
 {

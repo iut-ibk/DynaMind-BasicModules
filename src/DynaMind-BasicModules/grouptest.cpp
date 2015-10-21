@@ -30,7 +30,7 @@
 
 
 
-DM_DECLARE_GROUP_NAME(GroupTest, Loops)
+DM_DECLARE_GROUP_NAME(GroupTest, )
 GroupTest::GroupTest() {
     i = 0;
     Runs = 1;

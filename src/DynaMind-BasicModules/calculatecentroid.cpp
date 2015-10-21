@@ -31,7 +31,7 @@
 #include <math.h>
 
 
-DM_DECLARE_NODE_NAME(CalculateCentroid, Modules)
+DM_DECLARE_NODE_NAME(CalculateCentroid, )
 
 CalculateCentroid::CalculateCentroid()
 {

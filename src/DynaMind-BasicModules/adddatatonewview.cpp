@@ -29,7 +29,7 @@
 #include <algorithm>
 
 
-DM_DECLARE_NODE_NAME(AddDataToNewView, Modules)
+DM_DECLARE_NODE_NAME(AddDataToNewView, )
 AddDataToNewView::AddDataToNewView()
 {
     sys_in = 0;

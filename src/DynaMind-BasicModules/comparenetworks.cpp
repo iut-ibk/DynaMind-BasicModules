@@ -5,7 +5,7 @@
 #include <dmnode.h>
 
 
-DM_DECLARE_NODE_NAME( CompareNetworks,Modules )
+DM_DECLARE_NODE_NAME( CompareNetworks, )
 CompareNetworks::CompareNetworks() {
     //TODO Activate again
     std::vector<DM::View> views;

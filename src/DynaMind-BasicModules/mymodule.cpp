@@ -1,6 +1,6 @@
 #include "mymodule.h"
 
-DM_DECLARE_NODE_NAME( MyModule,Modules )
+DM_DECLARE_NODE_NAME( MyModule, )
 
 MyModule::MyModule() {
 
