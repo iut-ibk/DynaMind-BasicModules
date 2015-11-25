@@ -39,7 +39,7 @@
 
 
 //DM_DECLARE_NODE_NAME(ImportRasterData, Modules)
-DM_DECLARE_CUSTOM_NODE_NAME(ImportRasterData,"Import Land Cover", "Scenario Definition")
+DM_DECLARE_CUSTOM_NODE_NAME(ImportRasterData,"Import Land Cover Map", "Scenario Definition")
 
 ImportRasterData::ImportRasterData()
 {
