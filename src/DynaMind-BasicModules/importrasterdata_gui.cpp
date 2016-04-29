@@ -19,8 +19,7 @@ ImportRasterData_Gui::ImportRasterData_Gui(ImportRasterData * ird, QWidget *pare
     ui->le_cellsize->setText(this->ird->getcellsize().c_str());
     ui->le_cols->setText(this->ird->getcols().c_str());
     ui->le_rows->setText(this->ird->getrows().c_str());
-    QSettings settings;
-    this->ird->workingDir = settings.value("workPath").toString().toStdString();
+    this->ird->workingDir = this->ird->getWorkPath().toStdString();
 }
 
 ImportRasterData_Gui::~ImportRasterData_Gui()
@@ -31,7 +30,7 @@ ImportRasterData_Gui::~ImportRasterData_Gui()
 void ImportRasterData_Gui::on_pb_load_clicked()
 {
     QSettings settings;
-    QString workdir = QString(settings.value("workPath").toString());
+    QString workdir = this->ird->getWorkPath();
     QString datadir = QString(settings.value("dataPath").toString());
     QString fname = QFileDialog::getOpenFileName(this,"Map jpeg",datadir,"*.txt");
     if (fname == "")
@@ -63,14 +62,14 @@ void ImportRasterData_Gui::on_pb_load_clicked()
     this->ird->setParameterValue("Filename",bfname.toStdString());
     this->ird->setParameterValue("useMCD","false");
     settings.setValue("dataPath",finfo.absolutePath());
-    if(QFile::exists(settings.value("workPath").toString() + "/WSUDtech.mcd"));
-        QFile::remove(settings.value("workPath").toString() +"/WSUDtech.mcd");
+    if(QFile::exists(this->ird->getWorkPath() + "/WSUDtech.mcd"));
+        QFile::remove(this->ird->getWorkPath() +"/WSUDtech.mcd");
 }
 
 void ImportRasterData_Gui::on_pb_load_2_released()
 {
     QSettings settings;
-    QString workdir = QString(settings.value("workPath").toString());
+    QString workdir = this->ird->getWorkPath();
     QString datadir = QString(settings.value("dataPath").toString());
     QString fname = QFileDialog::getOpenFileName(this,"Map jpeg",datadir,"*.mcd");
     if (fname == "")
@@ -103,15 +102,14 @@ void ImportRasterData_Gui::on_pb_load_2_released()
     this->ird->setParameterValue("MCDFilename",bfname.toStdString());
     this->ird->setParameterValue("useMCD","true");
     settings.setValue("dataPath",finfo.absolutePath());
-    if(QFile::exists(settings.value("workPath").toString() + "/WSUDtech.mcd"));
-        QFile::remove(settings.value("workPath").toString() +"/WSUDtech.mcd");
+    if(QFile::exists(this->ird->getWorkPath() + "/WSUDtech.mcd"));
+        QFile::remove(this->ird->getWorkPath() +"/WSUDtech.mcd");
 }
 
 void ImportRasterData_Gui::on_bBox_accepted()
 {
-    QSettings settings;
-    QString workdir = QString(settings.value("workPath").toString());
-    this->ird->workingDir = settings.value("workPath").toString().toStdString();
+    QString workdir = this->ird->getWorkPath();
+    this->ird->workingDir = workdir.toStdString();
 
     QFile tmpfile(workdir+"/impfile.txt");
     if(tmpfile.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -136,8 +134,7 @@ void ImportRasterData_Gui::on_bBox_accepted()
 
 void ImportRasterData_Gui::writeDimensions()
 {
-    QSettings settings;
-    QString workdir = QString(settings.value("workPath").toString());
+    QString workdir = this->ird->getWorkPath();
     QFile dimfile(workdir+"/dimensions.txt");
     if(dimfile.open(QIODevice::WriteOnly | QIODevice::Text))
     {
